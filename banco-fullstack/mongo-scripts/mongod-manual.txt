@@ -1,0 +1,6 @@
+Arranque manual de mongod con replica set (sin usar el servicio de Windows)
+
+1) Detén el servicio si existe:        net stop MongoDB
+2) Crea la carpeta de datos:           mkdir C:\data\rs0
+3) Arranca mongod (déjala abierta):    mongod --replSet rs0 --dbpath C:\data\rs0 --port 27017 --bind_ip 127.0.0.1
+4) En otra terminal, una sola vez:     mongosh --file rs-initiate.js
