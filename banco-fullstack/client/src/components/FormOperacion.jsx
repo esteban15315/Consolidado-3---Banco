@@ -2,13 +2,13 @@ import { useState } from 'react';
 import Loading from './Loading.jsx';
 
 const config = {
-  DEPOSITO: { boton: 'Depositar', estilo: 'bg-esmeralda-600 hover:bg-esmeralda-500' },
-  RETIRO: { boton: 'Retirar', estilo: 'bg-marino-800 hover:bg-marino-700' },
-  TRANSFERENCIA: { boton: 'Transferir', estilo: 'bg-esmeralda-600 hover:bg-esmeralda-500' },
+  DEPOSITO: { boton: 'Depositar' },
+  RETIRO: { boton: 'Retirar' },
+  TRANSFERENCIA: { boton: 'Transferir' },
 };
 
 const campoClase =
-  'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-esmeralda-500 focus:ring-2 focus:ring-esmeralda-500/30 disabled:bg-slate-100';
+  'w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-bosque-900 outline-none transition placeholder:text-bosque-900/30 focus:border-bosque-700 focus:ring-2 focus:ring-lima-400/60 disabled:bg-lienzo';
 
 const formularioInicial = { monto: '', cuentaDestino: '', descripcion: '' };
 
@@ -44,30 +44,31 @@ export default function FormOperacion({ tipo, procesando, onSubmit }) {
     <form onSubmit={enviar} className="space-y-4" noValidate>
       {esTransferencia && (
         <div>
-          <label htmlFor="cuentaDestino" className="mb-1 block text-sm font-medium text-slate-600">Cuenta destino</label>
+          <label htmlFor="cuentaDestino" className="mb-1.5 block text-xs font-semibold text-bosque-900/70">Cuenta destino</label>
           <input id="cuentaDestino" name="cuentaDestino" value={form.cuentaDestino} onChange={cambiar}
-            placeholder="Ej. 1001-0002" disabled={procesando} className={`${campoClase} font-mono`} />
+            placeholder="Ej. 1001-0002" disabled={procesando} className={`${campoClase} font-mono`} autoFocus />
         </div>
       )}
 
       <div>
-        <label htmlFor="monto" className="mb-1 block text-sm font-medium text-slate-600">Monto</label>
+        <label htmlFor="monto" className="mb-1.5 block text-xs font-semibold text-bosque-900/70">Monto</label>
         <input id="monto" name="monto" type="number" inputMode="decimal" min="0" step="0.01"
-          value={form.monto} onChange={cambiar} placeholder="0.00" disabled={procesando} className={campoClase} />
+          value={form.monto} onChange={cambiar} placeholder="0.00" disabled={procesando}
+          className={campoClase} autoFocus={!esTransferencia} />
       </div>
 
       <div>
-        <label htmlFor="descripcion" className="mb-1 block text-sm font-medium text-slate-600">
-          Descripción <span className="text-slate-400">(opcional)</span>
+        <label htmlFor="descripcion" className="mb-1.5 block text-xs font-semibold text-bosque-900/70">
+          Descripción <span className="font-normal text-bosque-900/40">(opcional)</span>
         </label>
         <input id="descripcion" name="descripcion" maxLength={200} value={form.descripcion} onChange={cambiar}
           placeholder="Motivo de la operación" disabled={procesando} className={campoClase} />
       </div>
 
-      {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{error}</p>}
+      {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-red-600 animate-fade-in" role="alert">{error}</p>}
 
       <button type="submit" disabled={procesando}
-        className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold text-white shadow-md transition disabled:cursor-not-allowed disabled:opacity-60 ${config[tipo].estilo}`}>
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-bosque-900 px-4 py-3 text-sm font-bold text-lima-400 shadow-md transition duration-200 hover:-translate-y-0.5 hover:bg-bosque-800 hover:shadow-lg active:translate-y-0 active:scale-95 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60">
         {procesando ? <><Loading pequeno /> Procesando...</> : config[tipo].boton}
       </button>
     </form>

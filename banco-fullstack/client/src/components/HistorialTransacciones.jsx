@@ -1,90 +1,82 @@
+import { useState } from 'react';
 import Loading from './Loading.jsx';
-import { IconDeposito, IconRetiro, IconTransferencia } from './Icons.jsx';
+import { IconDeposito, IconRetiro, IconTransferencia, IconFlecha } from './Icons.jsx';
+import { moneda, fechaCorta, signo, describir } from '../utils/movimientos.js';
 
-const estilos = {
-  DEPOSITO: { etiqueta: 'Depósito', icono: IconDeposito, badge: 'bg-emerald-100 text-emerald-700' },
-  RETIRO: { etiqueta: 'Retiro', icono: IconRetiro, badge: 'bg-red-100 text-red-700' },
-  TRANSFERENCIA: { etiqueta: 'Transferencia', icono: IconTransferencia, badge: 'bg-blue-100 text-blue-700' },
+const iconos = {
+  DEPOSITO: { icono: IconDeposito, tile: 'bg-lima-300/50 text-bosque-700' },
+  RETIRO: { icono: IconRetiro, tile: 'bg-red-100 text-red-500' },
+  TRANSFERENCIA: { icono: IconTransferencia, tile: 'bg-sky-100 text-sky-600' },
 };
 
-const moneda = (v, c) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: c || 'USD' }).format(v);
-const fechaHora = (f) => new Date(f).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
-const etiquetaCuenta = (c) => (c ? c.numeroCuenta : '—');
-
-// Signo del movimiento desde el punto de vista de la cuenta actual
-function signo(mov, numeroCuenta) {
-  if (mov.tipo === 'DEPOSITO') return 1;
-  if (mov.tipo === 'RETIRO') return -1;
-  return mov.cuentaOrigen?.numeroCuenta === numeroCuenta ? -1 : 1;
-}
+const VISIBLES = 6;
 
 export default function HistorialTransacciones({ movimientos, cargando, numeroCuenta, monedaCuenta }) {
+  const [verTodos, setVerTodos] = useState(false);
+  const lista = verTodos ? movimientos : movimientos.slice(0, VISIBLES);
+
   return (
-    <section id="historial" className="scroll-mt-24 rounded-3xl bg-white p-5 shadow-md sm:p-6">
-      <h2 className="text-lg font-bold text-marino-900">Últimos movimientos</h2>
+    <section id="movimientos" className="scroll-mt-24 overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm animate-fade-up [animation-delay:300ms]">
+      <div className="flex items-start justify-between p-6 pb-4">
+        <div>
+          <h2 className="text-base font-bold">Últimos movimientos</h2>
+          <p className="text-xs text-bosque-900/50">Tus transacciones más recientes</p>
+        </div>
+        {movimientos.length > VISIBLES && (
+          <button
+            type="button"
+            onClick={() => setVerTodos((v) => !v)}
+            className="flex items-center gap-1 text-xs font-bold text-bosque-700 transition hover:text-bosque-950"
+          >
+            {verTodos ? 'Ver menos' : 'Ver todos'} <IconFlecha className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
 
       {cargando && movimientos.length === 0 ? (
         <Loading texto="Cargando historial..." />
       ) : movimientos.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-500">Aún no hay movimientos en esta cuenta.</p>
+        <p className="border-t border-black/5 py-10 text-center text-sm text-bosque-900/50">Aún no hay movimientos en esta cuenta.</p>
       ) : (
         <>
-          {/* Tabla en pantallas medianas y grandes */}
-          <div className="mt-4 hidden overflow-x-auto md:block">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="py-3 pr-4">Tipo</th>
-                  <th className="py-3 pr-4">Fecha y hora</th>
-                  <th className="py-3 pr-4">Origen</th>
-                  <th className="py-3 pr-4">Destino</th>
-                  <th className="py-3 text-right">Monto</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {movimientos.map((m) => {
-                  const e = estilos[m.tipo];
-                  const s = signo(m, numeroCuenta);
-                  return (
-                    <tr key={m._id} className="hover:bg-slate-50">
-                      <td className="py-3 pr-4">
-                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${e.badge}`}>
-                          <e.icono className="h-4 w-4" /> {e.etiqueta}
-                        </span>
-                      </td>
-                      <td className="py-3 pr-4 text-slate-600">{fechaHora(m.fecha)}</td>
-                      <td className="py-3 pr-4 font-mono">{etiquetaCuenta(m.cuentaOrigen)}</td>
-                      <td className="py-3 pr-4 font-mono">{etiquetaCuenta(m.cuentaDestino)}</td>
-                      <td className={`py-3 text-right font-bold ${s > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {s > 0 ? '+' : '−'}{moneda(m.monto, monedaCuenta)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="hidden grid-cols-[1fr_140px_150px_120px_24px] gap-4 border-t border-black/5 bg-lienzo/60 px-6 py-2.5 text-[10px] font-bold uppercase tracking-wider text-bosque-900/40 md:grid">
+            <span className="pl-[52px]">Descripción</span>
+            <span>Fecha</span>
+            <span>Monto</span>
+            <span>Estado</span>
+            <span />
           </div>
 
-          {/* Lista de tarjetas en móviles */}
-          <ul className="mt-4 space-y-3 md:hidden">
-            {movimientos.map((m) => {
-              const e = estilos[m.tipo];
+          <ul className="divide-y divide-black/5 border-t border-black/5 md:border-t-0">
+            {lista.map((m, i) => {
+              const { icono: Icono, tile } = iconos[m.tipo];
               const s = signo(m, numeroCuenta);
+              const { titulo, detalle } = describir(m, numeroCuenta);
               return (
-                <li key={m._id} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${e.badge}`}>
-                      <e.icono className="h-4 w-4" /> {e.etiqueta}
-                    </span>
-                    <span className={`font-bold ${s > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {s > 0 ? '+' : '−'}{moneda(m.monto, monedaCuenta)}
-                    </span>
+                <li
+                  key={m._id}
+                  className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 px-6 py-4 transition-colors animate-row hover:bg-lienzo/60 md:grid-cols-[1fr_140px_150px_120px_24px]"
+                  style={{ animationDelay: `${Math.min(i, 8) * 50}ms` }}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className={`shrink-0 rounded-xl p-2.5 ${tile}`}><Icono className="h-4 w-4" /></span>
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-bold">{titulo}</p>
+                      <p className="truncate text-[11px] text-bosque-900/50">{detalle}</p>
+                    </div>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">{fechaHora(m.fecha)}</p>
-                  <p className="mt-1 text-xs text-slate-600">
-                    <span className="font-mono">{etiquetaCuenta(m.cuentaOrigen)}</span>
-                    {m.cuentaDestino && <> → <span className="font-mono">{etiquetaCuenta(m.cuentaDestino)}</span></>}
+
+                  <p className="order-3 text-[11px] text-bosque-900/50 md:order-none">{fechaCorta(m.fecha)}</p>
+
+                  <p className={`text-xs font-bold tabular-nums md:text-left ${s > 0 ? 'text-bosque-700' : 'text-red-600'}`}>
+                    {s > 0 ? '+' : '−'} {moneda(m.monto, monedaCuenta)}
                   </p>
+
+                  <span className="hidden w-fit items-center gap-1.5 rounded-full bg-lima-300/40 px-2.5 py-1 text-[10px] font-semibold text-bosque-700 md:inline-flex">
+                    <span className="h-1.5 w-1.5 rounded-full bg-lima-500" /> Completada
+                  </span>
+
+                  <IconFlecha className="hidden h-4 w-4 text-bosque-900/30 md:block" />
                 </li>
               );
             })}

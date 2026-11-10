@@ -36,7 +36,12 @@ Las transacciones multidocumento **solo funcionan en un replica set**. Un replic
 4. `mongosh --eval "rs.initiate({_id:'rs0', members:[{_id:0, host:'127.0.0.1:27017'}]})"`
 5. Verifica: `mongosh --eval "rs.status().members[0].stateStr"` → `PRIMARY`.
 
-Sin servicio: ver `mongo-scripts/mongod-manual.txt`.
+**Sin servicio (mongod a mano):**
+1. Cierra cualquier `mongod` que esté corriendo sin replica set.
+2. En una terminal: `powershell -ExecutionPolicy Bypass -File mongo-scripts\start-mongod-rs.ps1` (déjala abierta).
+3. En otra terminal, una sola vez: `powershell -ExecutionPolicy Bypass -File mongo-scripts\init-rs-manual.ps1` → debe mostrar `PRIMARY`.
+
+Más detalle en `mongo-scripts/README.md`.
 
 ## 2. Backend
 ```bash

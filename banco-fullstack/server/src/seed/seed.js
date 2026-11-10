@@ -5,7 +5,7 @@ import Transaccion from '../models/Transaccion.js';
 import { conectarDB } from '../config/database.js';
 
 const cuentas = [
-  { titular: 'Ana Torres', numeroCuenta: '1001-0001', saldo: 5000, moneda: 'USD' },
+  { titular: 'Esteban Yupanqui', numeroCuenta: '1001-0001', saldo: 5000, moneda: 'USD' },
   { titular: 'Carlos Mendoza', numeroCuenta: '1001-0002', saldo: 2500.5, moneda: 'USD' },
   { titular: 'Lucía Fernández', numeroCuenta: '1001-0003', saldo: 10000, moneda: 'USD' },
   { titular: 'Miguel Rojas', numeroCuenta: '1001-0004', saldo: 150, moneda: 'USD' },
